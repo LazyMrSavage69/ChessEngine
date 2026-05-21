@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Play chess against a custom JavaScript engine with opening book, post-game review, and move classification." />
+  <title>Chess Engine — Play &amp; Analyze</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♟</text></svg>" />
+  <script type="module" crossorigin src="/assets/index-FcJ84lEs.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-1RhPPzu1.css">
+</head>
+<body>
+  <div id="app">
+
+    <!-- ═══ Header ═══ -->
+    <header class="game-header">
+      <h1>♟ Chess Engine</h1>
+      <div class="opening-info">
+        <span id="opening-name"></span>
+        <span id="opening-eco" class="eco-badge" style="display:none"></span>
+      </div>
+    </header>
+
+    <!-- ═══ Main layout ═══ -->
+    <div class="game-container">
+
+      <!-- Board column -->
+      <div class="board-wrapper">
+        <!-- Top player (opponent from current perspective) -->
+        <div class="player-bar" id="player-top">
+          <div class="player-name">
+            <span class="player-indicator black"></span>
+            <span id="player-top-name">Engine</span>
+          </div>
+          <div class="player-material" id="black-material"></div>
+        </div>
+
+        <!-- Eval bar + board -->
+        <div class="board-area">
+          <div class="eval-bar" id="eval-bar"></div>
+          <div id="board-container"></div>
+        </div>
+
+        <!-- Bottom player (you) -->
+        <div class="player-bar" id="player-bottom">
+          <div class="player-name">
+            <span class="player-indicator white"></span>
+            <span id="player-bottom-name">You</span>
+          </div>
+          <div class="player-material" id="white-material"></div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="sidebar">
+
+        <!-- Controls -->
+        <div class="controls-panel">
+          <div class="controls-row">
+            <button class="btn btn-primary" id="btn-new-game">⟳ New Game</button>
+            <button class="btn btn-icon" id="btn-flip" title="Flip Board">🔄</button>
+            <button class="btn" id="btn-undo" title="Undo Move">↩ Undo</button>
+          </div>
+          <div class="controls-row">
+            <select class="control-select" id="select-difficulty">
+              <option value="beginner">Beginner (~600)</option>
+              <option value="easy">Easy (~900)</option>
+              <option value="medium" selected>Medium (~1400)</option>
+              <option value="hard">Hard (~1800)</option>
+              <option value="expert">Expert (~2100)</option>
+            </select>
+            <select class="control-select" id="select-side">
+              <option value="w" selected>Play as White</option>
+              <option value="b">Play as Black</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Thinking indicator -->
+        <div class="thinking-indicator" id="thinking-indicator">
+          <div class="thinking-dots"><span></span><span></span><span></span></div>
+          <span>Engine is thinking…</span>
+        </div>
+
+        <!-- Game status -->
+        <div class="game-status" id="game-status"></div>
+
+        <!-- Engine info -->
+        <div class="engine-info" id="engine-info">
+          <div class="info-item">
+            <span class="info-label">Depth</span>
+            <span class="info-value" id="info-depth">—</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Eval</span>
+            <span class="info-value" id="info-score">—</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Nodes</span>
+            <span class="info-value" id="info-nodes">—</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Best</span>
+            <span class="info-value" id="info-move">—</span>
+          </div>
+        </div>
+
+        <!-- Move list -->
+        <div class="move-list-panel">
+          <h3>Moves</h3>
+          <div class="move-list" id="move-list"></div>
+        </div>
+
+        <!-- Review -->
+        <div>
+          <button class="btn btn-primary" id="btn-review" style="width:100%;margin-bottom:8px;">
+            📊 Review Game
+          </button>
+          <div id="review-container"></div>
+        </div>
+
+      </aside>
+    </div>
+
+    <!-- Toasts -->
+    <div class="toast-container" id="toast-container"></div>
+
+  </div>
+
+</body>
+</html>

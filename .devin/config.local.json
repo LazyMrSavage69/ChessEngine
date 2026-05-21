@@ -7,7 +7,10 @@
       "Exec(head)",
       "Exec(tail)",
       "Exec(npm run)",
-      "Exec(npx vite)"
+      "Exec(npx vite)",
+      "Exec(test)",
+      "Exec(find)",
+      "Exec(rm)"
     ]
   }
 }

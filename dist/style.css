@@ -480,22 +480,6 @@ body {
   margin-bottom: 0;
 }
 
-.checkbox-inline {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  cursor: pointer;
-  user-select: none;
-}
-
-.checkbox-inline input {
-  width: 16px;
-  height: 16px;
-  accent-color: var(--accent);
-}
-
 .btn {
   display: inline-flex;
   align-items: center;

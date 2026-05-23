@@ -39,6 +39,7 @@ let blackTimeMs = START_TIME_MS
 let clockTimer = null
 let lastTick = null
 let clockRunning = false
+let noTimeLimit = false
 
 // Snapshot-based undo/redo state. snapshots[currentIndex] is the LIVE FEN.
 // Every completed half-move (player or engine) appends a new snapshot.
@@ -141,6 +142,10 @@ function tickClock() {
     lastTick = performance.now()
     return
   }
+  if (noTimeLimit) {
+    lastTick = performance.now()
+    return
+  }
   if (isGameOver || isBrowsingHistory) {
     lastTick = performance.now()
     return
@@ -195,11 +200,11 @@ function updateClockUI() {
   const topMs = topColor === 'w' ? whiteTimeMs : blackTimeMs
   const bottomMs = bottomColor === 'w' ? whiteTimeMs : blackTimeMs
 
-  top.textContent = formatClock(topMs)
-  bottom.textContent = formatClock(bottomMs)
+  top.textContent = noTimeLimit ? '∞' : formatClock(topMs)
+  bottom.textContent = noTimeLimit ? '∞' : formatClock(bottomMs)
 
-  top.classList.toggle('low-time', topMs <= 30_000)
-  bottom.classList.toggle('low-time', bottomMs <= 30_000)
+  top.classList.toggle('low-time', !noTimeLimit && topMs <= 30_000)
+  bottom.classList.toggle('low-time', !noTimeLimit && bottomMs <= 30_000)
 }
 
 // ─── Worker ──────────────────────────────────────────────────────
@@ -503,6 +508,14 @@ function initControls() {
     playerColor = e.target.value
     newGame()
   })
+
+  const noTimerToggle = $('toggle-no-timer')
+  if (noTimerToggle) {
+    noTimerToggle.addEventListener('change', (e) => {
+      noTimeLimit = !!e.target.checked
+      updateClockUI()
+    })
+  }
 }
 
 function initTabs() {

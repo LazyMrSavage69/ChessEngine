@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Generate Access Code</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>" />
+
+  <!-- Supabase JS SDK (CDN). Must load BEFORE supabaseClient.js. -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+<body class="admin-page">
+  <!-- Hidden until the role check passes. -->
+  <main id="admin-root" class="hidden admin-shell">
+    <header class="admin-header">
+      <h1>🔐 Access Code Admin</h1>
+      <a href="/" class="btn btn-outline">← Back to game</a>
+    </header>
+
+    <section class="admin-card">
+      <h2>Generate a new code</h2>
+      <form id="admin-form" class="admin-form">
+        <label for="admin-email">Email of recipient</label>
+        <input type="email" id="admin-email" placeholder="user@example.com" required />
+        <button type="submit" class="btn btn-primary">Generate Code</button>
+      </form>
+
+      <div id="generated-row" class="generated-row hidden">
+        <label for="generated-code">Generated code:</label>
+        <input type="text" id="generated-code" readonly />
+        <button type="button" id="btn-copy-code" class="btn">Copy</button>
+      </div>
+
+      <p id="admin-status" class="admin-status"></p>
+    </section>
+
+    <section class="admin-card">
+      <h2>All access codes</h2>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr><th>Email</th><th>Code</th><th>Status</th><th>Created</th><th>Expires</th></tr>
+          </thead>
+          <tbody id="codes-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="/auth/admin.js"></script>
+</body>
+</html>

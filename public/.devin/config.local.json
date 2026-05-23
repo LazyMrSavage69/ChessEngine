@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Exec(mkdir)",
+      "Exec(node)",
+      "Exec(npm init)",
+      "Exec(head)",
+      "Exec(tail)",
+      "Exec(npm run)",
+      "Exec(npx vite)",
+      "Exec(test)",
+      "Exec(find)",
+      "Exec(rm)",
+      "Exec(cat)",
+      "Exec(grep)",
+      "Exec(ls)"
+    ]
+  }
+}

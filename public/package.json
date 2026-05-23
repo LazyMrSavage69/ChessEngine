@@ -1,0 +1,15 @@
+{
+  "name": "chess-engine",
+  "version": "1.0.0",
+  "description": "Browser-based chess engine with opening book, post-game review, login, and game saving.",
+  "type": "module",
+  "scripts": {
+    "dev":       "node --env-file-if-exists=.env build.js && npx http-server -c-1 dist -o",
+    "dev:raw":   "npx http-server -c-1 .",
+    "build":     "node --env-file-if-exists=.env build.js",
+    "preview":   "npx http-server -c-1 dist"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

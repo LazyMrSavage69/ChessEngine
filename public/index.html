@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Play chess against a custom JavaScript engine with opening book, post-game review, and move classification." />
+  <title>Chess Engine — Play &amp; Analyze</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♟</text></svg>" />
+
+  <!-- ─── External libraries (CDN — no bundler needed) ─── -->
+  <!-- Supabase JS SDK ships a UMD bundle that registers `window.supabase`. -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <!-- chess.js (v1.x) is ESM-only — no UMD/global build exists. We import it
+       directly in main.js / board.js / ui/reviewPanel.js via jsdelivr's `+esm`
+       endpoint, which works in both the main thread and module Workers. -->
+</head>
+<body>
+
+  <!-- ═══ Login screen (shown by auth/auth.js when no session) ═══ -->
+  <section id="login-screen" class="login-screen hidden">
+    <form id="login-form" class="login-card" autocomplete="on">
+      <h1>♟ Chess Engine</h1>
+      <p class="login-sub">Sign in to play</p>
+
+      <label for="login-email">Email</label>
+      <input type="email" id="login-email" autocomplete="email" required />
+
+      <label for="login-password">Password</label>
+      <input type="password" id="login-password" autocomplete="current-password" required />
+
+      <label for="login-code">Access code (valid 30 days)</label>
+      <input type="text" id="login-code" placeholder="30-day invite code" required />
+
+      <button type="submit" id="login-submit" class="btn btn-primary">Sign In</button>
+      <p id="login-error" class="login-error"></p>
+    </form>
+  </section>
+
+  <!-- ═══ Main app (hidden until auth resolves) ═══ -->
+  <div id="app-screen" class="hidden">
+    <div id="app">
+
+      <!-- ═══ Header ═══ -->
+      <header class="game-header">
+        <h1>♟ Chess Engine</h1>
+        <div class="opening-info">
+          <span id="opening-name"></span>
+          <span id="opening-eco" class="eco-badge" style="display:none"></span>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-outline" id="btn-logout" title="Sign out">Logout</button>
+        </div>
+      </header>
+
+      <!-- ═══ Main layout ═══ -->
+      <div class="game-container">
+
+        <!-- Board column -->
+        <div class="board-wrapper">
+          <!-- Top player (opponent from current perspective) -->
+          <div class="player-bar" id="player-top">
+            <div class="player-name">
+              <span class="player-indicator black"></span>
+              <span id="player-top-name">Engine</span>
+            </div>
+            <div class="player-clock" id="clock-top">10:00</div>
+            <div class="player-material" id="black-material"></div>
+          </div>
+
+          <!-- Eval bar + board -->
+          <div class="board-area">
+            <div id="board-container"></div>
+          </div>
+
+          <!-- Bottom player (you) -->
+          <div class="player-bar" id="player-bottom">
+            <div class="player-name">
+              <span class="player-indicator white"></span>
+              <span id="player-bottom-name">You</span>
+            </div>
+            <div class="player-clock" id="clock-bottom">10:00</div>
+            <div class="player-material" id="white-material"></div>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+
+          <!-- Controls -->
+          <div class="controls-panel">
+            <div class="controls-row">
+              <button class="btn btn-primary" id="btn-new-game">⟳ New Game</button>
+              <button class="btn btn-icon" id="btn-flip" title="Flip Board">🔄</button>
+              <button class="btn" id="btn-undo" title="Undo Move" disabled>↩ Undo</button>
+              <button class="btn" id="btn-redo" title="Redo Move" disabled>↪ Redo</button>
+            </div>
+            <div class="controls-row">
+              <select class="control-select" id="select-difficulty">
+                <option value="beginner">Beginner (~600)</option>
+                <option value="easy">Easy (~900)</option>
+                <option value="medium" selected>Medium (~1400)</option>
+                <option value="hard">Hard (~1800)</option>
+                <option value="expert">Expert (~2100)</option>
+              </select>
+              <select class="control-select" id="select-side">
+                <option value="w" selected>Play as White</option>
+                <option value="b">Play as Black</option>
+              </select>
+            </div>
+            <div class="controls-row">
+              <label class="checkbox-inline">
+                <input type="checkbox" id="toggle-no-timer" />
+                No time limit
+              </label>
+            </div>
+          </div>
+
+          <!-- Thinking indicator -->
+          <div class="thinking-indicator" id="thinking-indicator">
+            <div class="thinking-dots"><span></span><span></span><span></span></div>
+            <span>Engine is thinking…</span>
+          </div>
+
+          <!-- Game status -->
+          <div class="game-status" id="game-status"></div>
+
+          <!-- Engine info -->
+          <div class="engine-info" id="engine-info">
+            <div class="info-item">
+              <span class="info-label">Depth</span>
+              <span class="info-value" id="info-depth">—</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Eval</span>
+              <span class="info-value" id="info-score">—</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Nodes</span>
+              <span class="info-value" id="info-nodes">—</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Best</span>
+              <span class="info-value" id="info-move">—</span>
+            </div>
+          </div>
+
+          <!-- Move list -->
+          <div class="move-list-panel">
+            <h3>Moves</h3>
+            <div class="move-list" id="move-list"></div>
+          </div>
+
+          <!-- Review + tabs -->
+          <div class="sidebar-tabs">
+            <div class="tab-buttons">
+              <button class="tab-btn active" data-tab="review-tab">📊 Review</button>
+              <button class="tab-btn" data-tab="games-tab">🗂 My Games</button>
+            </div>
+            <div class="tab-panels">
+              <div id="review-tab" class="tab-panel active">
+                <button class="btn btn-primary" id="btn-review" style="width:100%;margin-bottom:8px;">
+                  📊 Review Game
+                </button>
+                <div id="review-container"></div>
+              </div>
+              <div id="games-tab" class="tab-panel">
+                <div id="games-container"></div>
+              </div>
+            </div>
+          </div>
+
+        </aside>
+      </div>
+
+      <!-- Toasts -->
+      <div class="toast-container" id="toast-container"></div>
+
+    </div>
+  </div>
+
+  <!-- Single init script: creates the shared Supabase client. -->
+  <script type="module" src="/supabaseClient.js"></script>
+  <!-- Auth gate + main app. -->
+  <script type="module" src="/main.js"></script>
+</body>
+</html>
